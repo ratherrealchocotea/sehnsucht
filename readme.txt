@@ -1,5 +1,7 @@
-kotori-os
-=========
+Sehnsucht-System
+================
+Programming as an art workshop for retarded children~~ ^-^
+
 Hopefully this is the last one and the one I will work on 
 long in the future, but you never know, so I won't make
 any promises; not that anybody would care anyway.

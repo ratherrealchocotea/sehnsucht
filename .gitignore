@@ -1,3 +1,4 @@
+flake.lock
 build/
 disk.img
 other/limine-binary
