@@ -1,6 +1,7 @@
 // int.c
 // interrupt-related stuff
 #include <interrupts/int.h>
+#include <drivers/tty/tty.h>
 #include <drivers/serial/serial.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -132,7 +133,7 @@ void idt_set_gate(uint8_t vector, void* handler) {
 
 void isr_handler(const cpu_state_t* cpu_state)
 {
-	serial_write("INTERRUPT: ");
+//	serial_write("INTERRUPT: ");
 	if(cpu_state->inter < 32)
 		exception_handler(cpu_state);
 
@@ -145,16 +146,16 @@ void isr_handler(const cpu_state_t* cpu_state)
 		_outb(0xa0, 0x20);
 	_outb(0x20, 0x20);
 
-	serial_write("Interrupt invoked");
+	//serial_write("Interrupt invoked");
 }
 
 __attribute__((noreturn))
 void exception_handler(const cpu_state_t* cpu_state)
 {
-	serial_write("An exception occurred. You screwed up.\n");
+    kwrite("An exception occurred. You screwed up.\n");
 	if(cpu_state->inter < 32)
-		serial_write(exception_messages[cpu_state->inter]);
+	    kwrite(exception_messages[cpu_state->inter]);
 	else
-		serial_write("Unknown exception");
+	    kwrite("Unknown exception");
 	for(;;) _hang(); // clt; ret
 }

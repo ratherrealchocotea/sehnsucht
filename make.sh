@@ -32,6 +32,16 @@ LDFLAGS="-nostdlib \
         -T linker.lds"
 ASFLAGS="-felf64 -Isrc/common/"
 PARTED_PATH="parted"
+LIMINE_PATH=$(nix-build '<nixpkgs>' -A limine --no-out-link)
+build_limine()
+{
+    mkdir -p other
+    rm -rf other/limine-binary limine-binary.tar.gz
+    curl -L https://github.com/Limine-Bootloader/Limine/releases/latest/download/limine-binary.tar.gz | gunzip | tar -xf - -C other/
+    make -C other/limine-binary && \
+        echo "Done building Limine"
+}
+
 clean()
 {
     rm -rvf \
@@ -41,14 +51,6 @@ clean()
        ./other/unscii.psf 
 }
 
-build_limine()
-{
-    mkdir -p other
-    rm -rf other/limine-binary limine-binary.tar.gz
-    curl -L https://github.com/Limine-Bootloader/Limine/releases/latest/download/limine-binary.tar.gz | gunzip | tar -xf - -C other/
-    make -C other/limine-binary && \
-        echo "Done building Limine"
-}
 build()
 {
     mkdir -p build
@@ -82,26 +84,23 @@ build()
     parted -s disk.img mkpart ESP fat32 4096s 100% && \
         parted -s disk.img set 2 esp on && \
         echo "Created ESP partition"
-    if [ -f "./other/limine-binary/limine" ]; then
-        # Wipe BIOS boot partition
-        dd if=/dev/zero of=disk.img bs=512 count=2048 seek=2048 conv=notrunc
-        
-        #./other/limine-binary/limine bios-install disk.img
-        limine bios-install disk.img
-        mformat -F -i disk.img@@2M ::
-        mmd -i disk.img@@2M ::/EFI
-        mmd -i disk.img@@2M ::/EFI/BOOT
-        mmd -i disk.img@@2M ::/boot
-        mmd -i disk.img@@2M ::/boot/limine
-        
-        mcopy -i disk.img@@2M $OUTPUT ::/boot
-        mcopy -i disk.img@@2M ./limine.conf ::/boot/limine
-        mcopy -i disk.img@@2M ./other/limine-binary/limine-bios.sys ::/boot/limine
-        mcopy -i disk.img@@2M ./other/limine-binary/BOOTX64.EFI ::/EFI/BOOT
-        mcopy -i disk.img@@2M ./other/limine-binary/BOOTIA32.EFI ::/EFI/BOOT
-        
-        echo "Built"
-    fi
+    # Wipe BIOS boot partition
+    dd if=/dev/zero of=disk.img bs=512 count=2048 seek=2048 conv=notrunc
+    
+    #./other/limine-binary/limine bios-install disk.img
+    "$LIMINE_PATH/bin/limine" bios-install disk.img
+    mformat -F -i disk.img@@2M ::
+    mmd -i disk.img@@2M ::/EFI
+    mmd -i disk.img@@2M ::/EFI/BOOT
+    mmd -i disk.img@@2M ::/boot
+    mmd -i disk.img@@2M ::/boot/limine
+    
+    mcopy -i disk.img@@2M $OUTPUT ::/boot
+    mcopy -i disk.img@@2M ./limine.conf ::/boot/limine
+    mcopy -i disk.img@@2M "$LIMINE_PATH/share/limine/limine-bios.sys" ::/boot/limine
+    mcopy -i disk.img@@2M "$LIMINE_PATH/share/limine/BOOTX64.EFI" ::/EFI/BOOT
+
+    echo "Built"
 }
 debug()
 {
