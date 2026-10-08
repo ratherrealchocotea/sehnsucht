@@ -2,6 +2,6 @@ flake.lock
 build/
 disk.img
 other/limine-binary
-kotori-os
+sehnsucht-system
 other/unscii.psf
 .gdb_history

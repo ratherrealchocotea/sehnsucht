@@ -25,6 +25,7 @@
             pkgs.gnumake
 			pkgs.doxygen
 			pkgs.parted
+			pkgs.lua
         ];
     };
   };

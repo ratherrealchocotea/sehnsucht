@@ -25,13 +25,13 @@ void font_init(void)
 		return;
     fb_pitch_pixels = fb->pitch / 4;
     font->header =
-        (psf1_font_header_t *)_binary_other_unscii_psf_start;
+        (psf1_font_header_t *)_binary___other_unscii_psf_start;
     if (font->header->magic != PSF_MAGIC_NUM) 
 		return;
     font->width = 8;
     font->height = font->header->charsize;
     font->num_glyphs = (font->header->mode & 1) ? 512 : 256;
-    font->glyphs = _binary_other_unscii_psf_start + 4;
+    font->glyphs = _binary___other_unscii_psf_start + 4;
 }
 // add boundary checking
 void limine_putpixel(uint32_t pos_x, uint32_t pos_y, uint32_t color) 

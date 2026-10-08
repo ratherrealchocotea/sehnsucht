@@ -9,8 +9,12 @@
 #include <drivers/serial/serial.h>
 #include <interrupts/int.h>
 
+#include <helpers.h>
+
 extern void _disable_int(void);
 extern void _init_pic(void);
+
+static uint64_t hhdm_offset;
 
 __attribute__((used, section(".limine_requests")))
 static volatile uint64_t limine_base_revision[] = LIMINE_BASE_REVISION(6);
@@ -21,12 +25,17 @@ volatile struct limine_framebuffer_request framebuffer_request = {
     .revision = 0
 };
 
-__attribute__((used, section(".limine_requests_start")))
-static volatile uint64_t limine_requests_start_marker[] = LIMINE_REQUESTS_START_MARKER;
+__attribute__((used, section(".limine_requests")))
+static volatile struct limine_rsdp_request rsdp_request = {
+    .id = LIMINE_RSDP_REQUEST_ID,
+    .revision = 0
+};
 
-__attribute__((used, section(".limine_requests_end")))
-static volatile uint64_t limine_requests_end_marker[] = LIMINE_REQUESTS_END_MARKER;
-
+__attribute__((used, section(".limine_requests")))
+static volatile struct limine_hhdm_request hhdm_request = {
+    .id = LIMINE_HHDM_REQUEST_ID,
+    .revision = 0
+};
 
 inline static void halt_catch_fire(void)
 {
@@ -46,9 +55,23 @@ void kmain(void)
 		halt_catch_fire();
 	}
 	fb = framebuffer_request.response->framebuffers[0];
-	_disable_int();
-	_init_pic();	
-	idt_init(); // also enables interrupts
+   
+	if(rsdp_request.response == NULL) {
+		kwrite("No RSDP provided by Limine");
+		halt_catch_fire();
+	}
+
+	if(hhdm_request.response == NULL) {
+		halt_catch_fire();
+	}
+	hhdm_offset = hhdm_request.response->offset;
+	//void* rsdp_addr = rsdp_request.response->address;
+	//uint64_t rsdp_addr_virt = addr_convert_p2v((uint64_t)rsdp_addr, (uint64_t)hhdm_offset);
+	
+	
+	//_disable_int();
+	//_init_pic();	
+	//idt_init(); // also enables interrupts
 	font_init();
 	tty_init();
 	

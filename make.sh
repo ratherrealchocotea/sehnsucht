@@ -1,6 +1,6 @@
 #!/bin/sh
-
-OUTPUT=kotori-os
+set -e
+OUTPUT=sehnsucht-system
 CC=x86_64-elf-gcc
 LD=x86_64-elf-ld
 AS=nasm
@@ -31,7 +31,7 @@ LDFLAGS="-nostdlib \
         --gc-sections \
         -T linker.lds"
 ASFLAGS="-felf64 -Isrc/common/"
-
+PARTED_PATH="parted"
 clean()
 {
     rm -rvf \
@@ -74,20 +74,20 @@ build()
 
     dd if=/dev/zero bs=1M count=0 seek=64 of=disk.img && \
         echo "Done creating disk image"
-    /sbin/parted -s disk.img mklabel gpt && \
+    parted -s disk.img mklabel gpt && \
         echo "Created GPT table"
-    /sbin/parted -s disk.img mkpart primary 1MiB 2MiB && \
-        /sbin/parted -s disk.img set 1 bios_grub on && \
+    parted -s disk.img mkpart primary 1MiB 2MiB && \
+        parted -s disk.img set 1 bios_grub on && \
         echo "Created BIOS boot partition"
-    /sbin/parted -s disk.img mkpart ESP fat32 4096s 100% && \
-        /sbin/parted -s disk.img set 2 esp on && \
+    parted -s disk.img mkpart ESP fat32 4096s 100% && \
+        parted -s disk.img set 2 esp on && \
         echo "Created ESP partition"
     if [ -f "./other/limine-binary/limine" ]; then
         # Wipe BIOS boot partition
         dd if=/dev/zero of=disk.img bs=512 count=2048 seek=2048 conv=notrunc
         
-        ./other/limine-binary/limine bios-install disk.img
-        
+        #./other/limine-binary/limine bios-install disk.img
+        limine bios-install disk.img
         mformat -F -i disk.img@@2M ::
         mmd -i disk.img@@2M ::/EFI
         mmd -i disk.img@@2M ::/EFI/BOOT

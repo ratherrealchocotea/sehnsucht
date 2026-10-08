@@ -12,8 +12,8 @@
 
 // requires the unscii font in ./other/unscii.psf
 // to be linked to the kernel binary
-extern uint8_t _binary_other_unscii_psf_start[];
-extern uint8_t _binary_other_unscii_psf_end[];
+extern uint8_t _binary___other_unscii_psf_start[];
+extern uint8_t _binary___other_unscii_psf_end[];
 extern volatile struct limine_framebuffer_request framebuffer_request;
 extern struct limine_framebuffer* fb;
 
