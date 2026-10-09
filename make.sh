@@ -1,6 +1,8 @@
 #!/bin/sh
+
 set -e
-OUTPUT=sehnsucht-system
+
+OUTPUT=sehnsucht
 CC=x86_64-elf-gcc
 LD=x86_64-elf-ld
 AS=nasm
@@ -33,6 +35,12 @@ LDFLAGS="-nostdlib \
 ASFLAGS="-felf64 -Isrc/common/"
 PARTED_PATH="parted"
 LIMINE_PATH=$(nix-build '<nixpkgs>' -A limine --no-out-link)
+CLANG_STYLE="mozilla"
+
+format() {
+    find src -name '*.c' -exec clang-format -i --style="$CLANG_STYLE" {} +
+}
+
 build_limine()
 {
     mkdir -p other
@@ -137,6 +145,10 @@ case "$1" in
         ;;
     debug)
         debug
+        exit 0
+        ;;
+    format)
+        format
         exit 0
         ;;
     *)

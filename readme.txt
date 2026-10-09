@@ -1,5 +1,5 @@
-Sehnsucht-System
-================
+Sehnsucht
+=========
 Programming as an art workshop for retarded children~~ ^-^
 
 Hopefully this is the last one and the one I will work on 
