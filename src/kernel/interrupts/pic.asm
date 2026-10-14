@@ -1,7 +1,7 @@
 ;; pic.asm
-
-global _init_pic
 global _disable_int
+global _init_pic
+global _disable_pic
 
 %define ICW1      0x11
 %define PIC1_CTRL 0x20
@@ -37,3 +37,11 @@ _init_pic:
         out PIC2_DATA, al
 
         ret
+
+_disable_pic:   
+    mov al, 0xff
+    out PIC1_DATA, al
+
+    mov al, 0xff
+    out PIC2_DATA, al
+    ret

@@ -11,6 +11,14 @@ typedef struct {
 } __attribute__((packed)) rsdp_t;
 
 typedef struct {
+	rsdp_t rsdp;
+	uint32_t len;
+	uint64_t xsdt_addr;
+	uint8_t ext_checksum;
+	uint8_t reserved[3];
+} __attribute__((packed)) rsdp2_t;
+
+typedef struct {
 	char signature[4];
 	uint32_t len;
 	uint8_t revision;
@@ -20,22 +28,16 @@ typedef struct {
 	uint32_t oem_revision;
 	uint32_t creator_id;
 	uint32_t creator_revision;
-} __attribute__((packed)) std_header_t;
+} __attribute__((packed)) sdt_header_t;
 
 typedef struct {
-	char signature[8];
-	uint8_t checksum;
-	char oem_id[6];
-	uint8_t revision;
-	uint32_t rsdt_address;
-	uint32_t len;
-	uint64_t xsdt_addr;
-	uint8_t extended_checksum;
-	uint8_t reserved[3]
-} __attribute__((packed)) xsdp_t;
+	sdt_header_t sdt;
+	uint64_t entries[];
+} __attribute__((packed)) xsdt_t;
 
 typedef struct {
-	std_header_t sdt;
+	sdt_header_t sdt;
 	uint32_t apic_addr;
 	uint32_t flags;
 } __attribute__((packed)) madt_t;
+

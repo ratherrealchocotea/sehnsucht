@@ -1,0 +1,14 @@
+BasedOnStyle: Mozilla
+IndentWidth: 4
+PointerAlignment: Left
+ColumnLimit: 80
+UseTab: Never
+SpaceAfterCStyleCast: false
+AllowShortLoopsOnASingleLine: true
+AllowShortBlocksOnASingleLine: true
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: true
+SpaceBeforeParens: ControlStatements
+BreakAfterReturnType: Automatic
+PenaltyReturnTypeOnItsOwnLine: 1000

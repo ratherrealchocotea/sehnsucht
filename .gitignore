@@ -2,6 +2,6 @@ flake.lock
 build/
 disk.img
 other/limine-binary
-sehnsucht-system
+sehnsucht
 other/unscii.psf
 .gdb_history

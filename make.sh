@@ -37,8 +37,9 @@ PARTED_PATH="parted"
 LIMINE_PATH=$(nix-build '<nixpkgs>' -A limine --no-out-link)
 CLANG_STYLE="mozilla"
 
-format() {
-    find src -name '*.c' -exec clang-format -i --style="$CLANG_STYLE" {} +
+format() 
+{
+    find src -name '*.c' -exec clang-format -i --style=file:.clang-format {} +
 }
 
 build_limine()
