@@ -36,11 +36,14 @@ ASFLAGS="-felf64 -Isrc/common/"
 PARTED_PATH="parted"
 LIMINE_PATH=$(nix-build '<nixpkgs>' -A limine --no-out-link)
 CLANG_STYLE="mozilla"
-
 format() 
 {
     find src -name '*.c' -exec clang-format -i --style=file:.clang-format {} +
 }
+OVMF_PATH=$(nix-build '<nixpkgs>' -A OVMF --no-out-link)
+OVMF_CODE="$OVMF_PATH/FV/OVMF_CODE.fd"
+OVMF_VARS_SRC="$OVMF_PATH/FV/OVMF_VARS.fd"
+
 
 build_limine()
 {
@@ -57,7 +60,8 @@ clean()
        build \
        $OUTPUT \
        disk.img \
-       ./other/unscii.psf 
+       ./other/unscii.psf \
+       "$OVMF_VARS"
 }
 
 build()
@@ -83,16 +87,12 @@ build()
     $LD -r -b binary ./other/unscii.psf -o build/unscii.o
     $LD $LDFLAGS -o $OUTPUT $(find build -name "*.o")
 
-    dd if=/dev/zero bs=1M count=0 seek=64 of=disk.img && \
-        echo "Done creating disk image"
-    parted -s disk.img mklabel gpt && \
-        echo "Created GPT table"
-    parted -s disk.img mkpart primary 1MiB 2MiB && \
-        parted -s disk.img set 1 bios_grub on && \
-        echo "Created BIOS boot partition"
-    parted -s disk.img mkpart ESP fat32 4096s 100% && \
-        parted -s disk.img set 2 esp on && \
-        echo "Created ESP partition"
+    dd if=/dev/zero bs=1M count=0 seek=64 of=disk.img
+    parted -s disk.img mklabel gpt
+    parted -s disk.img mkpart primary 1MiB 2MiB
+    parted -s disk.img set 1 bios_grub on
+    parted -s disk.img mkpart ESP fat32 4096s 100%
+    parted -s disk.img set 2 esp on
     # Wipe BIOS boot partition
     dd if=/dev/zero of=disk.img bs=512 count=2048 seek=2048 conv=notrunc
     
@@ -114,9 +114,9 @@ build()
 debug()
 {
     qemu-system-x86_64 \
-	    -drive format=raw,file=disk.img \
+        -drive format=raw,file=disk.img\
 	    -S -s \
-        -serial mon:stdio \
+	    -serial mon:stdio \
         -d int \
 	    -no-shutdown \
 	    -no-reboot
@@ -124,7 +124,8 @@ debug()
 
 run()
 {
-    qemu-system-x86_64 -drive format=raw,file=disk.img 
+    qemu-system-x86_64 \
+        -drive format=raw,file=disk.img
 }
 
 case "$1" in

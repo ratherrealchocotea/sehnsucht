@@ -32,6 +32,11 @@ typedef struct {
 
 typedef struct {
 	sdt_header_t sdt;
+	uint32_t entries[];
+} __attribute__((packed)) rsdt_t;
+
+typedef struct {
+	sdt_header_t sdt;
 	uint64_t entries[];
 } __attribute__((packed)) xsdt_t;
 
