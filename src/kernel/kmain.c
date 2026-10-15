@@ -10,15 +10,23 @@
 #include <string.h>
 
 #include <acpi/acpi.h>
-
+#include <acpi/madt.h>
 #include <helpers.h>
 
 extern void _disable_int(void);
 extern void _init_pic(void);
 extern void _disable_pic(void);
+
+extern void _enable_apic(void);
+extern uint64_t _get_apic_mmio_base(void);
+extern void _lapic_enable(volatile uint32_t* lapic);
+
 extern rsdp2_t* rsdp;
 extern xsdt_t* xsdt;
-static uint64_t hhdm_offset;
+extern madt_t* madt;
+extern uint32_t lapic_addr;
+
+uint64_t hhdm_offset;
 
 struct limine_framebuffer* fb;
 
@@ -71,6 +79,9 @@ void kmain(void)
     idt_init(); // also enables interrupts
     font_init();
     tty_init();
+
+    // Code related to the ACPI
+
     if (rsdp_request.response == NULL) {
         kwrite("No RSDP provided by Limine");
         halt_catch_fire();
@@ -101,6 +112,27 @@ void kmain(void)
     }
 
     acpi_check_table_signature();
+
+    // code related to the APIC
+    acpi_parse_madt();
+
+    volatile uint32_t* lapic =
+      (volatile uint32_t*)(uintptr_t)(lapic_addr + hhdm_offset);
+    _enable_apic();
+    _lapic_enable(lapic);
+
+    // Verify the APIC is really how it should be
+    uint32_t svr = lapic[0xf0 / 4];
+    if (!(svr & (1 << 8))) {
+        kwrite("LAPIC SVR enable failed");
+        halt_catch_fire();
+    }
+
+    uint32_t ver = lapic[0x30 / 4];
+    if (ver == 0 || ver == 0xffffffff) {
+        kwrite("The LAPIC is not responding!!");
+        halt_catch_fire();
+    }
 
     kwrite("Booted okay so far\n");
     halt_catch_fire();

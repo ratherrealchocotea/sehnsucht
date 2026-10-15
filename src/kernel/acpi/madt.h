@@ -69,4 +69,4 @@ typedef struct {
 } madt_apic_types_t;
 
 
-extern madt_apic_types_t* apic_lists[7][32];
+void acpi_parse_madt(void);

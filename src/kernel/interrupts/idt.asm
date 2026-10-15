@@ -82,7 +82,7 @@ interrupt_handler_common:
 	mov rdi, rsp
 	
 	mov rax, rsp
-	sub rsp, 8
+    ;; sub rsp, 8
 	and rsp, ~0xf
 	call isr_handler
 	popaq
