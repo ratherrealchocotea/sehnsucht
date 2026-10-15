@@ -67,3 +67,6 @@ typedef struct {
 	madt_entry_type4 type4;
 	madt_entry_type5 type5;
 } madt_apic_types_t;
+
+
+extern madt_apic_types_t* apic_lists[7][32];
